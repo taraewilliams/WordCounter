@@ -4,6 +4,8 @@
 
 In the terminal, run **python main.py**. Respond to the following prompts.
 
+This program was run in Python 3.6.3 with Anaconda.
+
 Necessary Python libraries: docx, unidecode, re, csv,
 pprint, termcolor, os, glob, sys
 
