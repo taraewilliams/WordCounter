@@ -1,26 +1,56 @@
-def get_word_array_exclude_words(words, exclude_words):
+
+##### Ungrouped Word Counts #####
+
+def get_word_counts(words, include_words=[], exclude_words=[]):
     word_counts = {}
+
     for word in words:
-        if word != "" and word != '' and word != '"' and word.lower() not in exclude_words:
-            word_counts = add_word_to_array(word_counts, word.lower())
-    return word_counts
+        if word != '' and word != ' ' and word != '"':
+            if include_words:
+                if word.lower() in include_words:
+                    word_counts = add_word_to_count(word_counts, word.lower())
+            elif exclude_words:
+                if word.lower() not in exclude_words:
+                    word_counts = add_word_to_count(word_counts, word.lower())
+            else:
+                word_counts = add_word_to_count(word_counts, word.lower())
 
 
-def get_word_array_include_words(words, include_words):
-    word_counts = {}
-    for word in words:
-        if word.lower() in include_words:
-            word_counts = add_word_to_array(word_counts, word.lower())
-    return word_counts
+    sorted_words = sort_word_counts(word_counts)
+    return sorted_words
 
 
-def get_word_array_include_word_groups(words, include_words):
+def get_word_counts_exclude_words(words, exclude_words):
+    exclude_words = [x.lower() for x in exclude_words]
+    return get_word_counts(words, [], exlude_words)
+
+
+def get_word_counts_include_words(words, include_words):
+    include_words = [x.lower() for x in include_words]
+    return get_word_counts(words, include_words, [])
+
+
+##### Grouped Word Counts #####
+
+def get_word_counts_include_word_groups(words, include_words):
     word_groups = make_word_groups(include_words)
     for word in words:
         for group in word_groups:
             if word in group["words"]:
                 group["count"] += 1
-    return word_groups
+
+    sorted_words = sort_word_counts_with_groups(word_groups)
+    return sorted_words
+
+
+##### Private Functions #####
+
+def add_word_to_count(word_counts, word):
+    if word in word_counts:
+        word_counts[word] += 1
+    else:
+        word_counts[word] = 1
+    return word_counts
 
 
 def make_word_groups(word_groups):
@@ -34,25 +64,9 @@ def make_word_groups(word_groups):
     return groups
 
 
-def get_word_array(words):
-    word_counts = {}
-    for word in words:
-        if word != '' and word != ' ':
-            word_counts = add_word_to_array(word_counts, word.lower())
-    return word_counts
-
-
-def add_word_to_array(word_counts, word):
-    if word in word_counts:
-        word_counts[word] += 1
-    else:
-        word_counts[word] = 1
-    return word_counts
-
-
-def sort_word_array(word_counts):
+def sort_word_counts(word_counts):
     return sorted(word_counts.items(), key=lambda x:x[1])
 
 
-def sort_word_array_with_groups(word_groups):
+def sort_word_counts_with_groups(word_groups):
     return sorted(word_groups, key=lambda group:group['count'])

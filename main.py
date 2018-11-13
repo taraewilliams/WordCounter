@@ -1,60 +1,165 @@
-import docx
-import re
-import unidecode
 from pprint import pprint
-import csv
-from os import path
+from termcolor import colored
 
-import matplotlib.pyplot as plt
 import word_calculations as wordcalc
 import word_graphs as wordgraph
-
-def main(file_name):
-
-    document = docx.Document(file_name)
-    text = '\n'.join([paragraph.text for paragraph in document.paragraphs])
-    text = text.replace('\n', ' ')
-    text = text.replace("\u2026", ' ')
-
-    quotations = "\u201c|\u201d"
-    periods = "\.| \.| \. |\. "
-    spaces = " |  "
-    commas = "\,| \,| \, |\, "
-    question_marks = "\?| \?| \? |\? "
-    exclamation_points = "\!| \!| \! |\! "
-    other = "\;|\; |\:|\: |\.\.\."
-    split_string = quotations + "|" + periods + "|" + spaces + "|" + commas + "|" + question_marks + "|" + exclamation_points + "|" + other
-
-    text_array = re.split(split_string, text)
-
-    pretty_text = []
-    for text_item in text_array:
-        pretty_text.append(unidecode.unidecode(text_item))
-
-    # get_names(pretty_text)
-    # get_colors(pretty_text)
-    # get_word_counts(pretty_text)
-    get_words_counts_significant_words(pretty_text)
+import read_files as readf
+import os
+import glob
+import sys
 
 
+def main():
+
+    ### Get Word documents ###
+    documents = get_documents('docs/full', 'docx')
+
+    ### Choose a document ###
+    file_name = get_file_name(documents)
+
+    ### Choose a word counting option ###
+    choose_option(file_name)
+
+
+### Get documents for path and extension (docx, csv, etc.) ###
+def get_documents(path, extension):
+    os.chdir(path)
+    documents = [i for i in glob.glob('*.{}'.format(extension))]
+    return documents
+
+
+### Get file name from terminal input ###
+def get_file_name(documents):
+    valid_input = False
+    while (not valid_input):
+
+        print(colored("\nChoose file number from the list: \n ", 'blue'))
+        j = 1
+        for document in documents:
+            print("(",j,")",document)
+            j += 1
+        print("(", len(documents) + 1, ") Quit \n")
+
+        file_num = input(colored("File number: \n ", 'blue'))
+
+        try:
+            file_index = int(file_num) - 1
+            if (file_index == len(documents)):
+                print("Quitting")
+                sys.exit(0)
+            elif (file_index < len(documents) and file_index >= 0):
+                valid_input = True
+            else:
+                print(colored("\nInvalid file name", 'red'))
+        except ValueError:
+            print(colored('\nYou must enter a number.', 'red'))
+
+    file_name = documents[file_index]
+    return file_name
+
+
+### Choose word counting option ###
+def choose_option(file_name):
+    valid_input = False
+    while (not valid_input):
+
+        print(colored("\nChoose Count Option:", 'blue'))
+
+        try:
+            option = int(input("\n (1) Character Names \n (2) Male/Female \n (3) Colors \n (4) All \n (5) Common Words \n (6) Quit \n"))
+            if (option >= 1 and option <= 5):
+                valid_input = True
+                pretty_text = readf.get_file_as_word_array(file_name)
+
+                ## Character Name Counts ###
+                if(option == 1):
+                    get_names(pretty_text)
+
+                ### Male/Female Word Counts ###
+                elif(option == 2):
+                    get_words_counts_male_female(pretty_text)
+
+                ### Color Counts ###
+                elif(option == 3):
+                    get_colors(pretty_text)
+
+                ### Word Counts ###
+                elif(option == 4):
+                    get_word_counts(pretty_text)
+
+                ### Common Word Counts ###
+                elif(option == 5):
+                    get_common_words(pretty_text)
+            else:
+                print("Quitting")
+                sys.exit(0)
+        except ValueError:
+            print(colored('\nYou must enter a number.', 'red'))
+
+
+### Character Name Counts ###
 def get_names(pretty_text):
-    name_groups = [["Philecta", "Philecta's"], ["Pilar", "Pilar's"], ["Lin", "Lin's"], ["Agatha", "Agatha's", "Aggie", "Aggie's"],
-        ["Archibald", "Archibald's", "Archie's", "Archie"], ["Mabel", "Mabel's"], ["Demetri", "Demetri's", "Demetrius", "Demetrius's"],
-        ["Ivan", "Ivan's"], ["Mitchie", "Mitchie's", "Michelle", "Michelle's"], ["Sabrina", "Sabrina's"], ["Eris", "Eris'", "Arianna", "Arianna's"],
-        ["Teddy", "Teddy's"], ["Oma", "Oma's"], ["Gareth", "Gareth's"], ["Roxie", "Roxie's", "Ethel", "Ethel's"], ["Thaddeus", "Thaddeus'", "Tad"],
-        ["Shadow", "Shadow's", "Elijah", "Elijah's"], ["Nathaniel", "Nathaniel's"], ["Rose", "Rose's"], ["Gloria", "Gloria's"], ["Blaise", "Blaise's"],
-        ["Sesi", "Sesi's"], ["Leo", "Leo's", "Leonardo", "Leonardo's"], ["Absalom", "Absalom's"], ["Mead", "Olivia"], ["Sophia", "Jones"], ["Boren", "Helga"],
-        ["Paula", "Davis"], ["McLellan", "Michael"], ["Jeanie"]]
-    name_group_counts = wordcalc.get_word_array_include_word_groups(pretty_text, name_groups)
-    sorted_names = wordcalc.sort_word_array_with_groups(name_group_counts)
-    pprint(sorted_names)
-    wordgraph.create_pie_chart_word_groups(sorted_names)
+
+    documents = get_documents('../../docs/groups', 'csv')
+
+    valid_input = False
+    while (not valid_input):
+
+        print(colored("\nChoose an option: \n ", 'blue'))
+
+        try:
+            option = int(input("\n (1) Choose existing CSV \n (2) Enter character names \n"))
+
+            if (option == 1):
+                file_name = get_file_name(documents)
+                names = readf.read_csv(file_name, True)
+                valid_input = True
+            elif (option == 2):
+                names = input_character_names()
+                valid_input = True
+            else:
+                print("Quitting")
+                sys.exit(0)
+
+        except ValueError:
+            print(colored('\nYou must enter a number.', 'red'))
+
+    print_items_grouped(pretty_text, names)
 
 
+### Write in your own character names in the terminal ###
+def input_character_names():
+    items = []
+
+    print(colored("\nEnter names (related names on one row, separated by commas)", 'blue'))
+    print(colored("\nExample: \"Jenna, Jenna's\" on one row, enter for new row, Q to quit \n", 'blue'))
+
+    while (True):
+
+        names = input()
+
+        if (names == "Q" or names == "q"):
+            print("Quitting")
+            return items
+        else:
+            row = names.split(',')
+            items.append(row)
+
+    return items
+
+
+### Male/Female Word Counts ###
+def get_words_counts_male_female(pretty_text):
+    female_words = readf.read_csv("female_words.csv")
+    male_words = readf.read_csv("male_words.csv")
+    group_words = [female_words, male_words]
+    print_items_grouped(pretty_text, group_words)
+
+
+### Color Word Counts ###
 def get_colors(pretty_text):
-    colors = ["blue", "brown", "red", "orange", "yellow", "pink", "green", "black", "violet", "purple", "gray", "indigo", "tan", "beige", "white"]
-    color_counts = wordcalc.get_word_array_include_words(pretty_text, colors)
-    sorted_colors = wordcalc.sort_word_array(color_counts)
+    colors = readf.read_csv("colors.csv")
+    sorted_colors = wordcalc.get_word_counts_include_words(pretty_text, colors)
     pprint(sorted_colors)
 
     labels = []
@@ -64,24 +169,24 @@ def get_colors(pretty_text):
     wordgraph.create_pie_chart_words(sorted_colors, labels)
 
 
+### Complete Word Counts ###
 def get_word_counts(pretty_text):
-    word_counts = wordcalc.get_word_array(pretty_text)
-    sorted_words = wordcalc.sort_word_array(word_counts)
+    word_counts = wordcalc.get_word_counts(pretty_text)
+    pprint(word_counts)
+
+
+### Common Word Counts ###
+def get_common_words(pretty_text):
+    common_words = readf.read_csv("common_words.csv")
+    sorted_words = wordcalc.get_word_counts_include_words(pretty_text, common_words)
     pprint(sorted_words)
 
 
-def get_words_counts_significant_words(pretty_text):
-    group_words = [["girl", "girls", "woman", "women", "mother", "mom", "mommy", "daughter"],
-        ["boy", "boys", "man", "men", "father", "dad", "daddy", "son"],
-        ["face", "cheeks", "nose", "eyes", "mouth", "ears", "ear"],
-        ["read", "library", "libraries", "book", "books", "journal", "journals"],
-        ["is", "was", "are", "were", "be", "wasn't", "isn't"],
-        ["smiled", "frowned", "grinned", "smiling", "frowning", "grinning"],
-        ["seemed", "appeared"],
-        ["very", "many", "few", "lot"]]
-    word_counts = wordcalc.get_word_array_include_word_groups(pretty_text, group_words)
-    sorted_words = wordcalc.sort_word_array_with_groups(word_counts)
-    pprint(sorted_words)
-    wordgraph.create_pie_chart_word_groups(sorted_words)
+### Print Grouped Items with Pie Chart ###
+def print_items_grouped(pretty_text, items):
+    sorted_items = wordcalc.get_word_counts_include_word_groups(pretty_text, items)
+    pprint(sorted_items)
+    wordgraph.create_pie_chart_word_groups(sorted_items)
 
-main("bookofsecrets.docx")
+
+main()
