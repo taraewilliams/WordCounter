@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+
 def create_pie_chart_words(words, colors = []):
 
     labels = []

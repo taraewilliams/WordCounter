@@ -3,6 +3,7 @@ import unidecode
 import re
 import csv
 
+
 def get_file_as_word_array(file_name):
     document = docx.Document(file_name)
     text = '\n'.join([paragraph.text for paragraph in document.paragraphs])
