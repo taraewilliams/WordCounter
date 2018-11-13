@@ -9,10 +9,13 @@ import glob
 import sys
 
 
+docx_dir = 'docs/full'
+csv_dir = 'docs/groups'
+
 def main():
 
     ### Get Word documents ###
-    documents = get_documents('docs/full', 'docx')
+    documents = get_documents(docx_dir, 'docx')
 
     ### Choose a document ###
     file_name = get_file_name(documents)
@@ -23,8 +26,10 @@ def main():
 
 ### Get documents for path and extension (docx, csv, etc.) ###
 def get_documents(path, extension):
+    owd = os.getcwd()
     os.chdir(path)
     documents = [i for i in glob.glob('*.{}'.format(extension))]
+    os.chdir(owd)
     return documents
 
 
@@ -69,7 +74,7 @@ def choose_option(file_name):
             option = int(input("\n (1) Character Names \n (2) Male/Female \n (3) Colors \n (4) All \n (5) Common Words \n (6) Quit \n"))
             if (option >= 1 and option <= 5):
                 valid_input = True
-                pretty_text = readf.get_file_as_word_array(file_name)
+                pretty_text = readf.get_file_as_word_array(docx_dir + "/" + file_name)
 
                 ## Character Name Counts ###
                 if(option == 1):
@@ -100,7 +105,7 @@ def choose_option(file_name):
 ### Character Name Counts ###
 def get_names(pretty_text):
 
-    documents = get_documents('../../docs/groups', 'csv')
+    documents = get_documents(csv_dir, 'csv')
 
     valid_input = False
     while (not valid_input):
@@ -112,7 +117,7 @@ def get_names(pretty_text):
 
             if (option == 1):
                 file_name = get_file_name(documents)
-                names = readf.read_csv(file_name, True)
+                names = readf.read_csv(csv_dir + "/" + file_name, True)
                 valid_input = True
             elif (option == 2):
                 names = input_character_names()
@@ -150,15 +155,15 @@ def input_character_names():
 
 ### Male/Female Word Counts ###
 def get_words_counts_male_female(pretty_text):
-    female_words = readf.read_csv("female_words.csv")
-    male_words = readf.read_csv("male_words.csv")
+    female_words = readf.read_csv(csv_dir + "/female_words.csv")
+    male_words = readf.read_csv(csv_dir + "/male_words.csv")
     group_words = [female_words, male_words]
     print_items_grouped(pretty_text, group_words)
 
 
 ### Color Word Counts ###
 def get_colors(pretty_text):
-    colors = readf.read_csv("colors.csv")
+    colors = readf.read_csv(csv_dir + "/colors.csv")
     sorted_colors = wordcalc.get_word_counts_include_words(pretty_text, colors)
     pprint(sorted_colors)
 
@@ -177,7 +182,7 @@ def get_word_counts(pretty_text):
 
 ### Common Word Counts ###
 def get_common_words(pretty_text):
-    common_words = readf.read_csv("common_words.csv")
+    common_words = readf.read_csv(csv_dir + "/common_words.csv")
     sorted_words = wordcalc.get_word_counts_include_words(pretty_text, common_words)
     pprint(sorted_words)
 

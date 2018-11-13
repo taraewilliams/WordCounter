@@ -1,7 +1,10 @@
 male,males
-man,man's,guy,guy's
-boy,boy's,boys,men
-men's,boys',father,father's
+man,man's
+men,men's
+guy,guy's
+boy,boy's
+boys,boys'
+father,father's,fathers
 dad,dad's,daddy,dads
-fathers,son,son's,his
-himself,sir
+son,son's,sons
+himself,sir,him,he,his
