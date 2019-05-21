@@ -1,6 +1,15 @@
 
 ##### Ungrouped Word Counts #####
 
+def get_word_counts_exclude_words(words, exclude_words):
+    exclude_words = [x.lower() for x in exclude_words]
+    return get_word_counts(words, [], exclude_words)
+
+
+def get_word_counts_include_words(words, include_words):
+    include_words = [x.lower() for x in include_words]
+    return get_word_counts(words, include_words, [])
+
 
 def get_word_counts(words, include_words=[], exclude_words=[]):
     word_counts = {}
@@ -19,16 +28,6 @@ def get_word_counts(words, include_words=[], exclude_words=[]):
 
     sorted_words = sort_word_counts(word_counts)
     return sorted_words
-
-
-def get_word_counts_exclude_words(words, exclude_words):
-    exclude_words = [x.lower() for x in exclude_words]
-    return get_word_counts(words, [], exlude_words)
-
-
-def get_word_counts_include_words(words, include_words):
-    include_words = [x.lower() for x in include_words]
-    return get_word_counts(words, include_words, [])
 
 
 ##### Grouped Word Counts #####

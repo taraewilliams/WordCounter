@@ -71,30 +71,38 @@ def choose_option(file_name):
         print(colored("\nChoose Count Option:", 'blue'))
 
         try:
-            option = int(input("\n (1) Character Names \n (2) Male/Female \n (3) Colors \n (4) All \n (5) Common Words \n (6) Quit \n"))
-            if (option >= 1 and option <= 5):
+            option = int(input("\n (1) All \n (2) Character Names \n (3) Male/Female \n (4) Colors \n (5) Common Words \n (6) Custom Words \n (7) All without Common Words \n (8) Quit \n"))
+            if (option >= 1 and option <= 7):
                 valid_input = True
                 pretty_text = readf.get_file_as_word_array(docx_dir + "/" + file_name)
 
-                ## Character Name Counts ###
+                ### Word Counts ###
                 if(option == 1):
+                    get_word_counts(pretty_text)
+
+                ## Character Name Counts ###
+                elif(option == 2):
                     get_names(pretty_text)
 
                 ### Male/Female Word Counts ###
-                elif(option == 2):
+                elif(option == 3):
                     get_words_counts_male_female(pretty_text)
 
                 ### Color Counts ###
-                elif(option == 3):
-                    get_colors(pretty_text)
-
-                ### Word Counts ###
                 elif(option == 4):
-                    get_word_counts(pretty_text)
+                    get_colors(pretty_text)
 
                 ### Common Word Counts ###
                 elif(option == 5):
                     get_common_words(pretty_text)
+
+                ### Custom Word Counts ###
+                elif(option == 6):
+                    get_custom_words(pretty_text)
+
+                ### Word Counts without Common Words ###
+                elif(option == 7):
+                    get_uncommon_words(pretty_text)
             else:
                 print("Quitting")
                 sys.exit(0)
@@ -102,6 +110,14 @@ def choose_option(file_name):
             print(colored('\nYou must enter a number.', 'red'))
 
 
+### Option 1 ###
+### Complete Word Counts ###
+def get_word_counts(pretty_text):
+    word_counts = wordcalc.get_word_counts(pretty_text)
+    pprint(word_counts)
+
+
+### Option 2 ###
 ### Character Name Counts ###
 def get_names(pretty_text):
 
@@ -153,6 +169,7 @@ def input_character_names():
     return items
 
 
+### Option 3 ###
 ### Male/Female Word Counts ###
 def get_words_counts_male_female(pretty_text):
     female_words = readf.read_csv(csv_dir + "/female_words.csv")
@@ -161,6 +178,7 @@ def get_words_counts_male_female(pretty_text):
     print_items_grouped(pretty_text, group_words)
 
 
+### Option 4 ###
 ### Color Word Counts ###
 def get_colors(pretty_text):
     colors = readf.read_csv(csv_dir + "/colors.csv")
@@ -174,12 +192,7 @@ def get_colors(pretty_text):
     wordgraph.create_pie_chart_words(sorted_colors, labels)
 
 
-### Complete Word Counts ###
-def get_word_counts(pretty_text):
-    word_counts = wordcalc.get_word_counts(pretty_text)
-    pprint(word_counts)
-
-
+### Option 5 ###
 ### Common Word Counts ###
 def get_common_words(pretty_text):
     common_words = readf.read_csv(csv_dir + "/common_words.csv")
@@ -187,11 +200,89 @@ def get_common_words(pretty_text):
     pprint(sorted_words)
 
 
+### Option 6 ###
+### Custom Word Counts ###
+def get_custom_words(pretty_text):
+
+    grouped = True
+    valid_input = False
+    while (not valid_input):
+
+        print(colored("\nChoose an option: \n ", 'blue'))
+
+        try:
+            option = int(input("\n (1) Enter ungrouped words \n (2) Enter grouped words \n"))
+
+            if (option == 1):
+                grouped = False
+                custom_words = input_custom_words(grouped)
+                valid_input = True
+            elif (option == 2):
+                custom_words = input_custom_words(grouped)
+                valid_input = True
+            else:
+                print("Quitting")
+                sys.exit(0)
+
+        except ValueError:
+            print(colored('\nYou must enter a number.', 'red'))
+
+    if (grouped):
+        print_items_grouped(pretty_text, custom_words)
+    else:
+        sorted_words = wordcalc.get_word_counts_include_words(pretty_text, custom_words)
+        pprint(sorted_words)
+
+
+### Write in custom words in the terminal ###
+def input_custom_words(grouped):
+    items = []
+
+    if (grouped):
+        print(colored("\nEnter words (group of words on one row, separated by commas)", 'blue'))
+        print(colored("\nExample: \"mother, father, parents\" on one row, enter for new row, Q to quit \n", 'blue'))
+
+        while (True):
+
+            names = input()
+
+            if (names == "Q" or names == "q"):
+                print("Quitting")
+                return items
+            else:
+                row = names.split(',')
+                items.append(row)
+    else:
+        print(colored("\nEnter words (separated by commas), Q on separate line to quit \n", 'blue'))
+
+        while (True):
+
+            names = input()
+
+            if (names == "Q" or names == "q"):
+                print("Quitting")
+                return items
+            else:
+                row = names.split(',')
+                items = items + row
+
+    return items
+
+
+### Option 7 ###
+### All Word Counts without Common Words ###
+def get_uncommon_words(pretty_text):
+    common_words = readf.read_csv(csv_dir + "/common_words.csv")
+    sorted_words = wordcalc.get_word_counts_exclude_words(pretty_text, common_words)
+    pprint(sorted_words)
+
+
 ### Print Grouped Items with Pie Chart ###
-def print_items_grouped(pretty_text, items):
+def print_items_grouped(pretty_text, items, chart=False):
     sorted_items = wordcalc.get_word_counts_include_word_groups(pretty_text, items)
     pprint(sorted_items)
-    wordgraph.create_pie_chart_word_groups(sorted_items)
+    if (chart):
+        wordgraph.create_pie_chart_word_groups(sorted_items)
 
 
 main()
